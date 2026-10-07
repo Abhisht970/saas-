@@ -46,6 +46,7 @@ return new class extends Migration
             ['title',       'Title',       'text',     false, false, false, null, 100],
             ['email',       'Email',       'email',    false, false, true,  null, 150],
             ['phone',       'Phone',       'phone',    false, false, true,  null, 30],
+            ['lead_value',       'Lead Lalue',       'text',    false, false, true,  null, 30],
             ['lead_source', 'Lead Source', 'select',   false, false, false,
                 ['Web', 'Phone Inquiry', 'Partner Referral', 'Purchased List', 'Other'], null],
             ['status',      'Lead Status', 'select',   true,  false, true,

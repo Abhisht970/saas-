@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Models\Lead;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,6 +10,10 @@ use App\Models\Tenant;
 use App\Services\TenantProvisioner;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\LeadController;
+use App\Http\Controllers\AccountFieldController;
+use App\Http\Controllers\DynamicObjectController;
+use App\Http\Controllers\DynamicFieldController;
+use App\Http\Controllers\DynamicRecordController;
 
 
 Route::domain('admin.localhost')->group(function () {
@@ -105,7 +110,7 @@ Route::middleware('tenant')->group(function () {
             return redirect('/leads');
         });
 
-    // Leads routes
+        // Leads routes
         Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
         Route::get('/leads/create', [LeadController::class, 'create'])->name('leads.create');
         Route::post('/leads', [LeadController::class, 'store'])->name('leads.store');
@@ -114,5 +119,47 @@ Route::middleware('tenant')->group(function () {
         Route::get('/leads/form/create', [LeadController::class, 'lead_form_create'])->name('leads.form.create');
         Route::post('/leads/form', [LeadController::class, 'lead_form_store'])->name('leads.form.store');
         Route::get('/leads/form/{id}/edit', [LeadController::class, 'lead_form_edit'])->name('leads.form.edit');
+
+        //accounts
+        Route::resource('accounts', AccountController::class);
+        Route::get('/account-fields', [AccountFieldController::class, 'index'])->name('account-fields.index');
+        Route::get('/account-fields/create', [AccountFieldController::class, 'create'])->name('account-fields.create');
+        Route::post('/account-fields', [AccountFieldController::class, 'store'])->name('account-fields.store');
+
+        Route::resource(
+            'dynamic-objects',
+            DynamicObjectController::class
+        );
+
+        Route::get(
+            '/dynamic-objects/{dynamicObject}/fields/create',
+            [DynamicFieldController::class, 'create']
+        )->name('dynamic-fields.create');
+
+        Route::post(
+            '/dynamic-objects/{dynamicObject}/fields',
+            [DynamicFieldController::class, 'store']
+        )->name('dynamic-fields.store');
+
+
+        Route::get(
+            '/objects/{objectKey}/create',
+            [DynamicRecordController::class, 'create']
+        )->name('dynamic-records.create');
+
+        Route::post(
+            '/objects/{objectKey}',
+            [DynamicRecordController::class, 'store']
+        )->name('dynamic-records.store');
     });
+
+    Route::get(
+        '/objects/{objectKey}',
+        [DynamicRecordController::class, 'index']
+    )->name('dynamic-records.index');
+
+    Route::get(
+    '/objects/{objectKey}/{record}',
+    [DynamicRecordController::class, 'show']
+)->name('dynamic-records.show');
 });

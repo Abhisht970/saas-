@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('title', 150)->nullable();
             $table->string('email', 150)->nullable();
             $table->string('phone', 30)->nullable();
+            $table->string('lead_value', 30)->nullable();
             $table->string('lead_source')->nullable();
             $table->string('status')->nullable();
             $table->string('rating')->nullable();            // Hot / Warm / Cold

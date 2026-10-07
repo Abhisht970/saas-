@@ -28,7 +28,7 @@ class LeadController extends Controller
             ->where('show_in_list', true)
             ->orderBy('sort_order')
             ->get();
-
+            
         return view('leads.index', compact(
             'leads',
             'customFields'
@@ -68,6 +68,7 @@ class LeadController extends Controller
             'custom_data.title' => ['nullable', 'string', 'max:150'],
             'custom_data.email' => ['nullable', 'email', 'max:150'],
             'custom_data.phone' => ['nullable', 'string', 'max:30'],
+            'custom_data.lead_value' => ['nullable', 'string', 'max:255'],
 
             'custom_data.lead_source' => ['nullable', 'string', 'max:255'],
             'custom_data.status' => ['nullable', 'string', 'max:255'],
@@ -79,23 +80,7 @@ class LeadController extends Controller
             'owner_id' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | 2. Get Form Data
-        |--------------------------------------------------------------------------
-        */
-
         $data = $validated['custom_data'];
-
-        /*
-        |--------------------------------------------------------------------------
-        | 3. Fixed Fields
-        |--------------------------------------------------------------------------
-        |
-        | Ye fields leads table ke actual columns hain.
-        | Ye custom_data JSON me nahi jayenge.
-        |
-        */
 
         $fixedFields = [
             'first_name',
@@ -104,45 +89,23 @@ class LeadController extends Controller
             'title',
             'email',
             'phone',
+            'lead_value',
             'lead_source',
             'status',
             'rating',
             'description',
         ];
 
-        /*
-        |--------------------------------------------------------------------------
-        | 4. Initial Custom Data
-        |--------------------------------------------------------------------------
-        |
-        | Request ke custom_data se fixed fields remove kar do.
-        |
-        */
-
         $customData = collect($data)
             ->except($fixedFields)
             ->toArray();
 
-        /*
-        |--------------------------------------------------------------------------
-        | 5. Get Only Dynamic Fields
-        |--------------------------------------------------------------------------
-        |
-        | Fixed fields agar lead_fields table me accidentally/default
-        | present bhi hain, to unhe dynamic field nahi maana jayega.
-        |
-        */
 
         $fields = LeadField::where('is_active', true)
             ->whereNotIn('key', $fixedFields)
             ->orderBy('sort_order')
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | 6. Process Dynamic Fields
-        |--------------------------------------------------------------------------
-        */
 
         foreach ($fields as $field) {
 
@@ -150,11 +113,6 @@ class LeadController extends Controller
 
             $value = $request->input("custom_data.$key");
 
-            /*
-            |--------------------------------------------------------------------------
-            | Required Field
-            |--------------------------------------------------------------------------
-            */
 
             if ($field->is_required) {
 
@@ -181,11 +139,6 @@ class LeadController extends Controller
                 }
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Checkbox
-            |--------------------------------------------------------------------------
-            */
 
             if ($field->type === 'checkbox') {
 
@@ -195,21 +148,11 @@ class LeadController extends Controller
                 continue;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Empty Value
-            |--------------------------------------------------------------------------
-            */
 
             if ($value === null || $value === '') {
                 continue;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Number / Currency
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 in_array($field->type, ['number', 'currency'], true)
@@ -224,11 +167,6 @@ class LeadController extends Controller
                     ->withInput();
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Email
-            |--------------------------------------------------------------------------
-            */
 
             if ($field->type === 'email') {
 
@@ -243,11 +181,6 @@ class LeadController extends Controller
                 }
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | URL
-            |--------------------------------------------------------------------------
-            */
 
             if ($field->type === 'url') {
 
@@ -262,11 +195,6 @@ class LeadController extends Controller
                 }
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Select
-            |--------------------------------------------------------------------------
-            */
 
             if ($field->type === 'select') {
 
@@ -283,11 +211,6 @@ class LeadController extends Controller
                 }
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Multiselect
-            |--------------------------------------------------------------------------
-            */
 
             if ($field->type === 'multiselect') {
 
@@ -317,11 +240,6 @@ class LeadController extends Controller
                 }
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Max Length
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 $field->max_length &&
@@ -337,20 +255,10 @@ class LeadController extends Controller
                     ->withInput();
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Save Dynamic Field
-            |--------------------------------------------------------------------------
-            */
 
             $customData[$key] = $value;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | 7. Create Lead
-        |--------------------------------------------------------------------------
-        */
 
         Lead::create([
 
@@ -361,6 +269,7 @@ class LeadController extends Controller
             'title' => $data['title'] ?? null,
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
+            'lead_value' => $data['lead_value'] ?? null,
 
             'lead_source' => $data['lead_source'] ?? null,
             'status' => $data['status'] ?? null,
@@ -375,12 +284,6 @@ class LeadController extends Controller
             // ONLY dynamic fields
             'custom_data' => $customData,
         ]);
-        dd($customData);
-        /*
-        |--------------------------------------------------------------------------
-        | 8. Redirect
-        |--------------------------------------------------------------------------
-        */
 
         return redirect()
             ->route('leads.index')

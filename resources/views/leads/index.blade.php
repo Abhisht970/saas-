@@ -27,17 +27,15 @@
 
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
-                    
+
                     <thead class="bg-gray-50">
                         <tr>
                             @foreach ($customFields as $field)
-
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
                                     {{ $field->label }}
                                 </th>
-
                             @endforeach
-                            
+
                             <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">
                                 Action
                             </th>
@@ -46,54 +44,56 @@
 
                     </thead>
 
-
-                    {{-- Table Body --}}
                     <tbody class="divide-y divide-gray-200">
 
                         @forelse ($leads as $lead)
-
                             <tr class="hover:bg-gray-50">
 
                                 @foreach ($customFields as $field)
-
                                     <td class="px-6 py-4 text-sm text-gray-700">
 
                                         @php
-                                            $value = $lead->custom_data[$field->key] ?? null;
+                                            /*
+                                             * First check actual Lead model/database column.
+                                             * If no value exists there, check custom_data JSON.
+                                             */
+
+                                            $fieldKey = $field->key;
+
+                                            $value = $lead->{$fieldKey} ?? null;
+
+                                            if (($value === null || $value === '') && !empty($lead->custom_data)) {
+                                                $customData = is_array($lead->custom_data)
+                                                    ? $lead->custom_data
+                                                    : json_decode($lead->custom_data, true);
+
+                                                $value = $customData[$fieldKey] ?? null;
+                                            }
                                         @endphp
 
 
                                         @if (is_array($value))
-
                                             {{ implode(', ', $value) }}
-
                                         @elseif ($value !== null && $value !== '')
-
                                             {{ $value }}
-
                                         @else
-
                                             <span class="text-gray-400">
                                                 -
                                             </span>
-
                                         @endif
 
                                     </td>
-
                                 @endforeach
 
 
-                                {{-- Action --}}
-                                <td class="px-6 py-4 text-right">
+                                {{-- Actions --}}
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
 
                                     <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                                         View
                                     </a>
 
-                                    <span class="mx-2 text-gray-300">
-                                        |
-                                    </span>
+                                    <span class="mx-2 text-gray-300">|</span>
 
                                     <a href="#" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
                                         Edit
@@ -106,15 +106,10 @@
                         @empty
 
                             <tr>
-
                                 <td colspan="{{ $customFields->count() + 1 }}" class="px-6 py-12 text-center text-gray-500">
-
                                     No leads found.
-
                                 </td>
-
                             </tr>
-
                         @endforelse
 
                     </tbody>
