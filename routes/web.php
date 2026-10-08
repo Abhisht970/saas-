@@ -114,6 +114,7 @@ Route::middleware('tenant')->group(function () {
         Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
         Route::get('/leads/create', [LeadController::class, 'create'])->name('leads.create');
         Route::post('/leads', [LeadController::class, 'store'])->name('leads.store');
+        Route::get('/leads/{lead}/convert-to-account', [LeadController::class, 'convertToAccount'])->name('leads.convert-to-account');
 
         Route::get('leads/form', [LeadController::class, 'lead_form'])->name('leads.form');
         Route::get('/leads/form/create', [LeadController::class, 'lead_form_create'])->name('leads.form.create');

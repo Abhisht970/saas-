@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\{Lead, LeadField};
 
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
+use App\Models\Account;
 class LeadController extends Controller
 {
     /**
@@ -12,7 +13,7 @@ class LeadController extends Controller
      */
     public function index()
     {
-        $leads = Lead::latest()->get();
+        $leads = Lead::latest()->where('is_converted', false)->get();
 
         $fixedFields = [
             'first_name',
@@ -371,9 +372,7 @@ class LeadController extends Controller
 
             'show_in_list' => ['nullable', 'boolean'],
         ]);
-
-
-        // 2. Key duplicate check
+        
         if (LeadField::where('key', $request->key)->exists()) {
 
             return back()
@@ -427,11 +426,55 @@ class LeadController extends Controller
 
             'sort_order' => $request->input('sort_order', 0),
         ]);
-
-
-        // 5. Redirect
+        
         return redirect()
             ->route('leads.form')
             ->with('success', 'Lead field created successfully.');
+    }
+
+  public function convertToAccount(Lead $lead)
+    {
+
+        if ($lead->is_converted) {
+
+            return back()->withErrors([
+                'lead' => 'This lead has already been converted.'
+            ]);
+        }
+
+        DB::connection('tenant')->transaction(function () use ($lead) {
+
+            Account::create([
+                'first_name'  => $lead->first_name,
+                'last_name'   => $lead->last_name,
+                'company'     => $lead->company,
+                'title'       => $lead->title,
+                'email'       => $lead->email,
+                'phone'       => $lead->phone,
+                'lead_value'  => $lead->lead_value,
+                'lead_source' => $lead->lead_source,
+                'status'      => $lead->status,
+                'rating'      => $lead->rating,
+                'description' => $lead->description,
+                'account_name'  => $lead->company,
+                'website'       => null,
+                'industry'      => null,
+                'employees'     => null,
+                'annual_revenue'=> null,
+                'password'      => null,
+                'custom_data' => $lead->custom_data,
+                'owner_id'   => $lead->owner_id,
+                'created_by' => $lead->created_by,
+            ]);
+
+            $lead->update([
+                'is_converted' => true,
+            ]);
+        });
+
+
+        return redirect()
+            ->route('leads.index')
+            ->with('success', 'Lead converted to account successfully.');
     }
 }

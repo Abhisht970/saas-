@@ -31,6 +31,7 @@ return new class extends Migration {
             // System columns
             $table->foreignId('owner_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->boolean('is_converted')->default(0);
             $table->timestamps();
             $table->softDeletes();
 

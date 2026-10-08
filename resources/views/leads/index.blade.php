@@ -88,7 +88,9 @@
 
                                 {{-- Actions --}}
                                 <td class="px-6 py-4 text-right whitespace-nowrap">
-
+                                      <a href="{{ route('leads.convert-to-account', $lead) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                        Convert to Account
+                                    </a>
                                     <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                                         View
                                     </a>
