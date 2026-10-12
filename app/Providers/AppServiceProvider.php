@@ -20,15 +20,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer('*', function ($view) {
+        // View::composer('*', function ($view) {
+            
+        //     $dynamicObjects = DynamicObject::query()
+        //         ->where('is_active', true)
+        //         ->orderBy('sort_order')
+        //         ->orderBy('name')
+        //         ->get()??[];
 
-            $dynamicObjects = DynamicObject::query()
-                ->where('is_active', true)
-                ->orderBy('sort_order')
-                ->orderBy('name')
-                ->get();
+        //         dd($dynamicObjects);
 
-            $view->with('dynamicObjects', $dynamicObjects);
-        });
+        //     $view->with('dynamicObjects', $dynamicObjects);
+        // });
     }
 }

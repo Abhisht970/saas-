@@ -11,8 +11,9 @@
     </title>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @yield('head')
 </head>
@@ -191,7 +192,7 @@
 
         <div class="my-1 border-t border-gray-200"></div>
 
-        @forelse($dynamicObjects as $object)
+        {{-- @forelse($dynamicObjects as $object)
 
             <a
                 href="{{ route('dynamic-records.index', $object->key) }}"
@@ -206,7 +207,7 @@
                 No pages created
             </div>
 
-        @endforelse
+        @endforelse --}}
     </div>
 </li>
 

@@ -14,7 +14,7 @@ use App\Http\Controllers\AccountFieldController;
 use App\Http\Controllers\DynamicObjectController;
 use App\Http\Controllers\DynamicFieldController;
 use App\Http\Controllers\DynamicRecordController;
-
+use App\Http\Controllers\UserActivityController;
 
 Route::domain('admin.localhost')->group(function () {
 
@@ -160,7 +160,12 @@ Route::middleware('tenant')->group(function () {
     )->name('dynamic-records.index');
 
     Route::get(
-    '/objects/{objectKey}/{record}',
-    [DynamicRecordController::class, 'show']
-)->name('dynamic-records.show');
+        '/objects/{objectKey}/{record}',
+        [DynamicRecordController::class, 'show']
+    )->name('dynamic-records.show');
+
+
+    Route::post('/activity/idle', [UserActivityController::class, 'idle'])->name('activity.idle');
+    Route::post('/activity/active', [ UserActivityController::class, 'active' ])->name('activity.active');
+
 });
